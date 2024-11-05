@@ -47,12 +47,10 @@ public class DatabaseTest {
 
     @Test
     public void can_book_an_available_seat() {
-        var train = database.insertTrain("Orient Express");
-        var seat = new Seat();
-        seat.setTrain(train);
-        seat.setNumber("2A");
-        database.insertSeat(seat);
+        database.insertTrainWithSeats("Orient Express", "1A", "2A");
 
+        var train = database.getTrain("Orient Express").get();
+        var seat = database.getSeat(train, "2A").get();
         database.bookSeat(seat, "abc123");
 
         var savedSeat = database.getSeat(train, "2A").get();
@@ -61,10 +59,10 @@ public class DatabaseTest {
 
     @Test
     public void cannot_book_an_occupied_seat() {
-        var train = database.insertTrain("Orient Express");
-        var seat = new Seat();
-        seat.setTrain(train);
-        seat.setNumber("2A");
+        database.insertTrainWithSeats("Orient Express", "1A", "2A");
+
+        var train = database.getTrain("Orient Express").get();
+        var seat = database.getSeat(train, "2A").get();
         seat.setBookingReference("abc123");
         database.insertSeat(seat);
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import info.dmerej.train_reservation.controllers.BookingRequest;
 import info.dmerej.train_reservation.controllers.TrainSummary;
-import info.dmerej.train_reservation.models.Seat;
 import info.dmerej.train_reservation.services.Database;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,22 +60,14 @@ class TrainReservationApplicationTests {
 
     @Test
     void book_available_seat() throws Exception {
-        var train = database.insertTrain("Express 2000");
-        var seat = new Seat();
-        seat.setTrain(train);
-        seat.setNumber("2A");
-        database.insertSeat(seat);
-        var request = new BookingRequest("Express 2000", List.of("2A"), "abc123");
-        var mapper = new ObjectMapper();
-        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        String requestJson = ow.writeValueAsString(request);
+        database.insertTrainWithSeats("Express 2000", "1A", "2A");
 
-        mockMvc.perform(
-                post("/book")
-                    .contentType(APPLICATION_JSON_UTF8)
-                    .content(requestJson))
-            .andExpect(status().isOk());
+        var request = new BookingRequest("Express 2000", List.of("2A"), "abc123");
+
+        postBooking(request);
+        // No assertions : we already check the status code in the above method
     }
+
 
     @Test
     void get_trains_when_two_trains_in_database() throws Exception {
@@ -99,5 +90,15 @@ class TrainReservationApplicationTests {
         return objectMapper.readValue(json, collectionType);
     }
 
+    private void postBooking(BookingRequest request) throws Exception {
+        var mapper = new ObjectMapper();
+        ObjectWriter objectWriter = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = objectWriter.writeValueAsString(request);
 
+        mockMvc.perform(
+                post("/book")
+                    .contentType(APPLICATION_JSON_UTF8)
+                    .content(requestJson))
+            .andExpect(status().isOk());
+    }
 }

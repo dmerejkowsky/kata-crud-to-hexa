@@ -53,4 +53,14 @@ public class Database {
     public Optional<Train> getTrain(String name) {
         return trainRepository.findOneByName(name);
     }
+
+    public void insertTrainWithSeats(String name, String... seatNumbers) {
+        var train = insertTrain(name);
+        for (var seatNumber : seatNumbers) {
+            var seat = new Seat();
+            seat.setNumber(seatNumber);
+            seat.setTrain(train);
+            seatRepository.save(seat);
+        }
+    }
 }
