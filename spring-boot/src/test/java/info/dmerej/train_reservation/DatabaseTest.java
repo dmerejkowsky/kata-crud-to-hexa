@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class DatabaseTest {
@@ -30,12 +31,44 @@ public class DatabaseTest {
     }
 
     @Test
-    public void can_insert_a_seat() {
+    public void can_insert_an_available_seat() {
+        var train = database.insertTrain("Orient Express");
+        var seat = new Seat();
+        seat.setTrain(train);
+        seat.setNumber("2A");
+        database.insertSeat(seat);
+
+        var savedSeat = database.getSeat(train, "2A").get();
+        assertThat(savedSeat.getBookingReference()).isNull();
+    }
+
+    @Test
+    public void can_book_an_available_seat() {
+        var train = database.insertTrain("Orient Express");
+        var seat = new Seat();
+        seat.setTrain(train);
+        seat.setNumber("2A");
+        database.insertSeat(seat);
+
+        database.bookSeat(seat, "abc123");
+
+        var savedSeat = database.getSeat(train, "2A").get();
+        assertThat(savedSeat.getBookingReference()).isEqualTo("abc123");
+    }
+
+    @Test
+    public void cannot_book_an_occupied_seat() {
         var train = database.insertTrain("Orient Express");
         var seat = new Seat();
         seat.setTrain(train);
         seat.setNumber("2A");
         seat.setBookingReference("abc123");
         database.insertSeat(seat);
+
+        var alreadyBooked = database.getSeat(train, "2A").get();
+        assertThatThrownBy(() ->
+            database.bookSeat(alreadyBooked, "def456")
+        ).isInstanceOf(RuntimeException.class);
     }
+
 }

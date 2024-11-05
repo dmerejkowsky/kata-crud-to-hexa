@@ -41,4 +41,16 @@ public class Database {
     public Seat insertSeat(Seat seat) {
         return seatRepository.save(seat);
     }
+
+    public Optional<Seat> getSeat(Train train, String number) {
+        return seatRepository.findOneByTrainAndNumber(train, number);
+    }
+
+    public void bookSeat(Seat seat, String bookingReference) {
+        if (seat.getBookingReference() != null && seat.getBookingReference() != bookingReference) {
+            throw new RuntimeException("already booked");
+        }
+        seat.setBookingReference(bookingReference);
+        seatRepository.save(seat);
+    }
 }
