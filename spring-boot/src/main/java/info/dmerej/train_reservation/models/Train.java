@@ -5,23 +5,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
-public class Book {
+public class Train {
 
     private String name;
     @Id
     @GeneratedValue
     private Long id;
-
-    public Book() {
+    public Train() {
     }
 
-    public Book(String name) {
+    public Train(String name) {
         this.name = name;
     }
 
     @Override
     public String toString() {
-        return "Book{" +
+        return "Train{" +
             "name='" + name + '\'' +
             ", id=" + id +
             '}';
