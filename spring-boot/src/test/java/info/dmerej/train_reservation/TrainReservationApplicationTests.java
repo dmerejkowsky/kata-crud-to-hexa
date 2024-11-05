@@ -2,7 +2,7 @@ package info.dmerej.train_reservation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.dmerej.train_reservation.controllers.TrainSummary;
-import info.dmerej.train_reservation.services.TrainService;
+import info.dmerej.train_reservation.services.Database;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +29,11 @@ class TrainReservationApplicationTests {
     private ApplicationContext context;
 
     @Autowired
-    private TrainService trainService;
+    private Database database;
 
     @BeforeEach
     void resetDatabase() {
-        trainService.deleteAll();
+        database.deleteAll();
     }
 
     @Test
@@ -49,8 +49,8 @@ class TrainReservationApplicationTests {
 
     @Test
     void get_trains_when_two_trains_in_database() throws Exception {
-        trainService.insertTrain("Express 2000");
-        trainService.insertTrain("Orient Express");
+        database.insertTrain("Express 2000");
+        database.insertTrain("Orient Express");
 
         List<TrainSummary> returnedTrains = getTrains();
         var returnedNames = returnedTrains.stream().map(b -> b.name()).collect(Collectors.toList());

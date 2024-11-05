@@ -3,6 +3,9 @@ package info.dmerej.train_reservation.models;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+import java.util.Set;
 
 @Entity
 public class Train {
@@ -11,12 +14,9 @@ public class Train {
     @Id
     @GeneratedValue
     private Long id;
-    public Train() {
-    }
 
-    public Train(String name) {
-        this.name = name;
-    }
+    @OneToMany(mappedBy = "train")
+    private Set<Seat> seats;
 
     @Override
     public String toString() {
