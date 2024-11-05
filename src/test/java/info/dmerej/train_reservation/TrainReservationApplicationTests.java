@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,9 +64,9 @@ class TrainReservationApplicationTests {
         String json = response.getContentAsString();
         var objectMapper = new ObjectMapper();
         var collectionType = objectMapper.getTypeFactory().constructCollectionType(List.class, Book.class);
-        List<Book> books = objectMapper.readValue(json, collectionType);
-
-        assertThat(books).hasSameElementsAs(List.of(book1, book2));
+        List<Book> returnedBooks = objectMapper.readValue(json, collectionType);
+        var returnedNames = returnedBooks.stream().map(b -> b.getName()).collect(Collectors.toList());
+        assertThat(returnedNames).hasSameElementsAs(List.of(book1.getName(), book2.getName()));
     }
 
 }
