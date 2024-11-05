@@ -1,7 +1,10 @@
 package info.dmerej.train_reservation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import info.dmerej.train_reservation.controllers.BookingRequest;
 import info.dmerej.train_reservation.controllers.TrainSummary;
+import info.dmerej.train_reservation.models.Seat;
 import info.dmerej.train_reservation.services.Database;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,19 +12,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class TrainReservationApplicationTests {
+    public static final MediaType APPLICATION_JSON_UTF8 = new MediaType(
+        MediaType.APPLICATION_JSON.getType(),
+        MediaType.APPLICATION_JSON.getSubtype(),
+        StandardCharsets.UTF_8
+    );
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -45,6 +57,25 @@ class TrainReservationApplicationTests {
         List<TrainSummary> returnedTrains = getTrains();
 
         assertThat(returnedTrains).isEmpty();
+    }
+
+    @Test
+    void book_available_seat() throws Exception {
+        var train = database.insertTrain("Express 2000");
+        var seat = new Seat();
+        seat.setTrain(train);
+        seat.setNumber("2A");
+        database.insertSeat(seat);
+        var request = new BookingRequest("Express 2000", List.of("2A"), "abc123");
+        var mapper = new ObjectMapper();
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(request);
+
+        mockMvc.perform(
+                post("/book")
+                    .contentType(APPLICATION_JSON_UTF8)
+                    .content(requestJson))
+            .andExpect(status().isOk());
     }
 
     @Test

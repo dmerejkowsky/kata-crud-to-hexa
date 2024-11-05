@@ -26,7 +26,7 @@ public class Database {
         seatRepository.deleteAll();
         trainRepository.deleteAll();
     }
-    
+
     public Train insertTrain(String name) {
         var entity = new Train();
         entity.setName(name);
@@ -48,5 +48,9 @@ public class Database {
         }
         seat.setBookingReference(bookingReference);
         seatRepository.save(seat);
+    }
+
+    public Optional<Train> getTrain(String name) {
+        return trainRepository.findOneByName(name);
     }
 }

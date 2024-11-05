@@ -28,6 +28,9 @@ public class DatabaseTest {
 
         var trains = database.getTrainNames();
         assertThat(trains).hasSameElementsAs(List.of("Express 2000"));
+
+        var train = database.getTrain("Express 2000");
+        assertThat(train).isPresent();
     }
 
     @Test
