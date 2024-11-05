@@ -26,11 +26,7 @@ public class Database {
         seatRepository.deleteAll();
         trainRepository.deleteAll();
     }
-
-    public Optional<Train> getById(Long id) {
-        return trainRepository.findById(id);
-    }
-
+    
     public Train insertTrain(String name) {
         var entity = new Train();
         entity.setName(name);
