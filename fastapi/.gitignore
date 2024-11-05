@@ -1,0 +1,9 @@
+__pycache__
+.mypy_cache
+build/
+dist/
+.ropeproject
+.venv
+
+.env
+*.sqlite3
