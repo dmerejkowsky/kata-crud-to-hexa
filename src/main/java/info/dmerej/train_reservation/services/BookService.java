@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -14,5 +15,17 @@ public class BookService {
 
     public List<Book> list() {
         return bookRepository.findAll();
+    }
+
+    public Long add(Book book) {
+        return bookRepository.save(book).getId();
+    }
+
+    public void deleteAll() {
+        bookRepository.deleteAll();
+    }
+
+    public Optional<Book> getById(Long id) {
+        return bookRepository.findById(id);
     }
 }
