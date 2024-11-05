@@ -19,6 +19,14 @@ public class Book {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "Book{" +
+            "name='" + name + '\'' +
+            ", id=" + id +
+            '}';
+    }
+
     public Long getId() {
         return id;
     }

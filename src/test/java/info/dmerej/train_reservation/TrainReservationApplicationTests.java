@@ -1,11 +1,17 @@
 package info.dmerej.train_reservation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import info.dmerej.train_reservation.models.Book;
+import info.dmerej.train_reservation.services.BookService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,10 +24,16 @@ class TrainReservationApplicationTests {
     @Autowired
     private MockMvc mockMvc;
 
-
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private BookService bookService;
+
+    @BeforeEach
+    void resetDatabase() {
+        bookService.deleteAll();
+    }
 
     @Test
     void contextLoads() {
@@ -35,6 +47,25 @@ class TrainReservationApplicationTests {
             .getResponse();
         String contents = response.getContentAsString();
         assertThat(contents).isEqualTo("[]");
+    }
+
+    @Test
+    void getBooksWhenTwoBooksInDatabase() throws Exception {
+        var book1 = new Book("Axiom's End");
+        var book2 = new Book("Truth of the Divine");
+        bookService.add(book1);
+        bookService.add(book2);
+
+        var response = mockMvc.perform(get("/books"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse();
+        String json = response.getContentAsString();
+        var objectMapper = new ObjectMapper();
+        var collectionType = objectMapper.getTypeFactory().constructCollectionType(List.class, Book.class);
+        List<Book> books = objectMapper.readValue(json, collectionType);
+
+        assertThat(books).hasSameElementsAs(List.of(book1, book2));
     }
 
 }
