@@ -1,7 +1,7 @@
 package info.dmerej.train_reservation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.dmerej.train_reservation.models.Train;
+import info.dmerej.train_reservation.controllers.TrainSummary;
 import info.dmerej.train_reservation.services.TrainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,7 +42,7 @@ class TrainReservationApplicationTests {
 
     @Test
     void get_trains_when_database_is_empty() throws Exception {
-        List<Train> returnedTrains = getTrains();
+        List<TrainSummary> returnedTrains = getTrains();
 
         assertThat(returnedTrains).isEmpty();
     }
@@ -51,18 +52,19 @@ class TrainReservationApplicationTests {
         trainService.insertTrain("Express 2000");
         trainService.insertTrain("Orient Express");
 
-        List<Train> returnedTrains = getTrains();
-        Checkers.checkNames(returnedTrains, "Express 2000", "Orient Express");
+        List<TrainSummary> returnedTrains = getTrains();
+        var returnedNames = returnedTrains.stream().map(b -> b.name()).collect(Collectors.toList());
+        assertThat(returnedNames).hasSameElementsAs(List.of("Express 2000", "Orient Express"));
     }
 
-    private List<Train> getTrains() throws Exception {
+    private List<TrainSummary> getTrains() throws Exception {
         var response = mockMvc.perform(get("/trains"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse();
         String json = response.getContentAsString();
         var objectMapper = new ObjectMapper();
-        var collectionType = objectMapper.getTypeFactory().constructCollectionType(List.class, Train.class);
+        var collectionType = objectMapper.getTypeFactory().constructCollectionType(List.class, TrainSummary.class);
         return objectMapper.readValue(json, collectionType);
     }
 

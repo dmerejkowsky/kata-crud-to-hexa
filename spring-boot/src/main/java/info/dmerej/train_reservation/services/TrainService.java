@@ -7,14 +7,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TrainService {
     @Autowired
     private TrainRepository trainRepository;
 
-    public List<Train> list() {
-        return trainRepository.findAll();
+    public List<String> getTrainNames() {
+        return trainRepository.findAll().stream().map(Train::getName).collect(Collectors.toList());
     }
 
     public void deleteAll() {
