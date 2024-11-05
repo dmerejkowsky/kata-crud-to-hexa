@@ -31,6 +31,11 @@ class TrainReservationApplicationTests {
     @Autowired
     private BookService bookService;
 
+    private static void checkNames(List<Book> returnedBooks, String... names) {
+        var returnedNames = returnedBooks.stream().map(b -> b.getName()).collect(Collectors.toList());
+        assertThat(returnedNames).hasSameElementsAs(List.of(names));
+    }
+
     @BeforeEach
     void resetDatabase() {
         bookService.deleteAll();
@@ -46,8 +51,8 @@ class TrainReservationApplicationTests {
             .andExpect(status().isOk())
             .andReturn()
             .getResponse();
-        String contents = response.getContentAsString();
-        assertThat(contents).isEqualTo("[]");
+        List<Book> returnedBooks = getBooks();
+        assertThat(returnedBooks).isEmpty();
     }
 
     @Test
@@ -57,6 +62,11 @@ class TrainReservationApplicationTests {
         bookService.add(book1);
         bookService.add(book2);
 
+        List<Book> returnedBooks = getBooks();
+        checkNames(returnedBooks, book1.getName(), book2.getName());
+    }
+
+    private List<Book> getBooks() throws Exception {
         var response = mockMvc.perform(get("/books"))
             .andExpect(status().isOk())
             .andReturn()
@@ -64,9 +74,8 @@ class TrainReservationApplicationTests {
         String json = response.getContentAsString();
         var objectMapper = new ObjectMapper();
         var collectionType = objectMapper.getTypeFactory().constructCollectionType(List.class, Book.class);
-        List<Book> returnedBooks = objectMapper.readValue(json, collectionType);
-        var returnedNames = returnedBooks.stream().map(b -> b.getName()).collect(Collectors.toList());
-        assertThat(returnedNames).hasSameElementsAs(List.of(book1.getName(), book2.getName()));
+        return objectMapper.readValue(json, collectionType);
     }
+
 
 }
